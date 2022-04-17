@@ -7,6 +7,7 @@ class DisplayProductViewController: UIViewController {
     //MARK: Outlet
     @IBOutlet weak var productCV: UICollectionView!
     
+    private var isBookmarkSwitchOn = false
     //MARK: Global Variables
     var productArray: [ProductModel] = []
     var product: ProductModel?
@@ -129,18 +130,21 @@ class DisplayProductViewController: UIViewController {
     @objc func switchTarget(sender: UISwitch!)
     {
         if sender.isOn {
-            print("Switch is On")
+            clearCollectionViewData()
+            isBookmarkSwitchOn = true
             self.title = "Data from API"
             callAPIDataBase()
-            
         } else{
-            print("Switch is Off")
+            clearCollectionViewData()
+            isBookmarkSwitchOn = false
             self.title = "Data from the File Directory"
-            productArray.removeAll()
-            productCV.reloadData()
-            
             productArray = readData()
         }
+    }
+    
+    private func clearCollectionViewData() {
+        productArray.removeAll()
+        productCV.reloadData()
     }
     
     private func collectionViewConstrains() {
@@ -190,8 +194,6 @@ class DisplayProductViewController: UIViewController {
                 let product = ProductModel(id: id, title: title, price: price, descrition: description, category: category, rating: [:], rate: rate, count: count, imageUrl: nil, image: nil)
                 products.append(product)
                 
-            } else {
-                print("Read Query NOT executed")
             }
             return products
         } else {
@@ -242,6 +244,7 @@ class DisplayProductViewController: UIViewController {
     
 }
 
+// MARK: UICollectionViewDataSource
 extension DisplayProductViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         productArray.count
@@ -258,13 +261,15 @@ extension DisplayProductViewController: UICollectionViewDataSource {
         cell.productPrice.text = "\(productIndex.price)"
         cell.layer.cornerRadius = 10
         
-        
+        cell.backgroundColor = isBookmarkSwitchOn ? .orange : .green
+
         return cell
     }
     
 }
 //MARK: UICollectionViewDelegateFlowLayout
 extension DisplayProductViewController : UICollectionViewDelegateFlowLayout {
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 196.0, height: 110.0)
     }
