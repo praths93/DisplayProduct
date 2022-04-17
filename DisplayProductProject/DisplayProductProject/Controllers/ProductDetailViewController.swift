@@ -43,7 +43,7 @@ class ProductDetailViewController: UIViewController {
         
     }
     
-
+    
     
     //MARK: Create Button
     private func creatCartButton() {
@@ -83,7 +83,7 @@ class ProductDetailViewController: UIViewController {
         
         insertDataInTable(product: productObj)
         
-
+        
         //readData()
         
         for product in self.productsAry {
@@ -93,23 +93,23 @@ class ProductDetailViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
     }
     //MARK: Step 2 - Create DataBase
-   private func openCreateDatabase() {
+    private func openCreateDatabase() {
         guard let dbPath = getPathForDocumentsDirectory() else{
             print("Documents Directory Path is Missing")
             return
         }
         print("DB Path: \(dbPath)")
-       
-       //Step2.1 - Importing SQLite3 and To check Database is Created or already present (bitcode.sqlite)
-       var dbdetails: OpaquePointer?
-       if sqlite3_open(dbPath,
-                       &dbdetails) == SQLITE_OK { /* Sqlite Ok used to check the query condition*/
-           print("Database is successfully created Or Already Present & we are able to access it/Open it")
-           self.dbDetailsObject = dbdetails
-       } else {
-           print("Unable to Create Or Open DB")
-
-       }
+        
+        //Step2.1 - Importing SQLite3 and To check Database is Created or already present (bitcode.sqlite)
+        var dbdetails: OpaquePointer?
+        if sqlite3_open(dbPath,
+                        &dbdetails) == SQLITE_OK { /* Sqlite Ok used to check the query condition*/
+            print("Database is successfully created Or Already Present & we are able to access it/Open it")
+            self.dbDetailsObject = dbdetails
+        } else {
+            print("Unable to Create Or Open DB")
+            
+        }
     }
     
     //MARK: Step 1 - To Get Path For Documents Directory
@@ -128,7 +128,7 @@ class ProductDetailViewController: UIViewController {
             print(error.localizedDescription)
             return nil
         }
-
+        
     }
     //MARK: Step 3 - Create Employees Table in Database
     private func createProductTableDB() {
@@ -139,22 +139,22 @@ class ProductDetailViewController: UIViewController {
         //Step-3.1 -> Preparing a Query -> we need query because sqlite understands a query language to communicate.
         // * Query has fixed Syntax
         if sqlite3_prepare_v2(self.dbDetailsObject,
-                               createTableQuery,
-                               -1,
-                               &opaquePointerObject_CreateTable,
-                               nil) == SQLITE_OK { /* Sqlite Ok used to check the query condition*/
-        print("Query Prepared Successful")
+                              createTableQuery,
+                              -1,
+                              &opaquePointerObject_CreateTable,
+                              nil) == SQLITE_OK { /* Sqlite Ok used to check the query condition*/
+            print("Query Prepared Successful")
             
             //Step-3.2 -> Execute Query -> If Successful
-           if sqlite3_step(opaquePointerObject_CreateTable) == SQLITE_DONE { /* Sqlite Done used to execute an action  i.e To create Table */
+            if sqlite3_step(opaquePointerObject_CreateTable) == SQLITE_DONE { /* Sqlite Done used to execute an action  i.e To create Table */
                 print("Table Employee Created Successfully")
             } else {
                 print("Table Employee Not Created")
             }
             
-       } else {
-           print("Query Not Prepared. Some issue in Create Table Query. No proper Query Or Table Already Exists")
-       }
+        } else {
+            print("Query Not Prepared. Some issue in Create Table Query. No proper Query Or Table Already Exists")
+        }
     }
     //MARK: Step 4 - To Insert Data in Table
     private func insertDataInTable(product: ProductModel) {
@@ -163,41 +163,41 @@ class ProductDetailViewController: UIViewController {
         //(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image BLOB,Rate DOUBLE, Count INTEGER)
         let insertQuery = "INSERT INTO \(tableNameProducts)(ID,Title,Price,Description,Category,Rate,Count) VALUES(?,?,?,?,?,?,?)"
         // Prepare
-       if sqlite3_prepare_v2(self.dbDetailsObject,
-                           insertQuery,
-                           -1,
-                           &OpaquePointerInsertData,
-                           nil) == SQLITE_OK {/* Sqlite Ok used to check the query condition*/
-           // Conversions
-           let id = Int32(product.id)
-           let title = (product.title as NSString).utf8String
-           let price = Double(product.price)
-           let description = (product.descrition as NSString).utf8String
-           let category = (product.category as NSString).utf8String
-//           let image = (product.imageUrl! as URL)
-           let rate = Double(product.rate)
-           let count = Int32(product.count)
-
-           //Binding
-           sqlite3_bind_int(OpaquePointerInsertData, 1, id) // Id
-           sqlite3_bind_text(OpaquePointerInsertData, 2, title, -1, nil) // Title
-           sqlite3_bind_double(OpaquePointerInsertData, 3, price) // Price
-           sqlite3_bind_text(OpaquePointerInsertData,4,description, -1,nil) // Description
-           sqlite3_bind_text(OpaquePointerInsertData, 5, category,-1,nil) // Category
-//         sqlite3_bind_blob(OpaquePointerInsertData, 6, image,-1,nil) // Image
-           sqlite3_bind_double(OpaquePointerInsertData, 6, rate) // Rate
-           sqlite3_bind_int(OpaquePointerInsertData, 7, count) // Count
-           // step
-           if sqlite3_step(OpaquePointerInsertData) == SQLITE_DONE { /* Sqlite Done used to execute an action  i.e To Inserting Data */
-               print("Data Inserted Successfully")
-           } else {
-               print("Insert data Failed")
-           }
-           
-       } else {
-           print("Insert Query not Prepared")
-       }
-  
+        if sqlite3_prepare_v2(self.dbDetailsObject,
+                              insertQuery,
+                              -1,
+                              &OpaquePointerInsertData,
+                              nil) == SQLITE_OK {/* Sqlite Ok used to check the query condition*/
+            // Conversions
+            let id = Int32(product.id)
+            let title = (product.title as NSString).utf8String
+            let price = Double(product.price)
+            let description = (product.descrition as NSString).utf8String
+            let category = (product.category as NSString).utf8String
+            //           let image = (product.imageUrl! as URL)
+            let rate = Double(product.rate)
+            let count = Int32(product.count)
+            
+            //Binding
+            sqlite3_bind_int(OpaquePointerInsertData, 1, id) // Id
+            sqlite3_bind_text(OpaquePointerInsertData, 2, title, -1, nil) // Title
+            sqlite3_bind_double(OpaquePointerInsertData, 3, price) // Price
+            sqlite3_bind_text(OpaquePointerInsertData,4,description, -1,nil) // Description
+            sqlite3_bind_text(OpaquePointerInsertData, 5, category,-1,nil) // Category
+            //         sqlite3_bind_blob(OpaquePointerInsertData, 6, image,-1,nil) // Image
+            sqlite3_bind_double(OpaquePointerInsertData, 6, rate) // Rate
+            sqlite3_bind_int(OpaquePointerInsertData, 7, count) // Count
+            // step
+            if sqlite3_step(OpaquePointerInsertData) == SQLITE_DONE { /* Sqlite Done used to execute an action  i.e To Inserting Data */
+                print("Data Inserted Successfully")
+            } else {
+                print("Insert data Failed")
+            }
+            
+        } else {
+            print("Insert Query not Prepared")
+        }
+        
     }
     
     private func readData() -> [ProductModel] {
@@ -206,26 +206,26 @@ class ProductDetailViewController: UIViewController {
         
         var products = [ProductModel]()
         
-       if sqlite3_prepare_v2(self.dbDetailsObject,
-                           readQuery,
-                           -1,
-                           &readStatement,
-                           nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(self.dbDetailsObject,
+                              readQuery,
+                              -1,
+                              &readStatement,
+                              nil) == SQLITE_OK {
             print("Read Query Compiled Successfully")
             if sqlite3_step(readStatement) == SQLITE_ROW {
                 //(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image BLOB,Rate DOUBLE, Count INTEGER)
-               print("Read Query executed successfully")
+                print("Read Query executed successfully")
                 let idInt32 = sqlite3_column_int(readStatement, 0)
                 let id = Int(idInt32)
                 let price = sqlite3_column_double(readStatement, 2)
                 let rate = sqlite3_column_double(readStatement, 6)
                 let countInt32 = sqlite3_column_int(readStatement, 7)
                 let count = Int(countInt32)
-           guard
-                let titleCStr = sqlite3_column_text(readStatement, 1),
-                let descriptionCStr = sqlite3_column_text(readStatement, 3),
-                let categoryCStr = sqlite3_column_text(readStatement, 4)
-              //  let image = sqlite3_column_blob(readStatement, 5)
+                guard
+                    let titleCStr = sqlite3_column_text(readStatement, 1),
+                    let descriptionCStr = sqlite3_column_text(readStatement, 3),
+                    let categoryCStr = sqlite3_column_text(readStatement, 4)
+                        //  let image = sqlite3_column_blob(readStatement, 5)
                 else {
                     return [ProductModel]()
                 }
@@ -241,11 +241,11 @@ class ProductDetailViewController: UIViewController {
             } else {
                 print("Read Query NOT executed")
             }
-           return products
-       } else {
-           print("Read Query Compilation Failed")
-           return [ProductModel]()
-       }
+            return products
+        } else {
+            print("Read Query Compilation Failed")
+            return [ProductModel]()
+        }
     }
 }
 
