@@ -18,15 +18,21 @@ class DisplayProductViewController: UIViewController {
     //MARK: Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        openCreateDatabase()
         createSwitchBarButton()
         self.title = "Data from the File Directory"
-        collectionViewRegistration()
+        collectionViewCellRegistration()
         collectionViewConstrains()
         
         productCV.dataSource = self
         productCV.delegate = self
         
+        fetchDataFromDBAndLoadCollectionView()
+    }
+    
+    private func fetchDataFromDBAndLoadCollectionView() {
+        productArray = readData()
+        productCV.reloadData()
     }
     
     private func callAPIDataBase() {
@@ -103,8 +109,7 @@ class DisplayProductViewController: UIViewController {
     }
     
     //MARK: Collection View Cell Register
-    private func collectionViewRegistration() {
-        
+    private func collectionViewCellRegistration() {
         let productCollectionViewCellXib = UINib(nibName: "ProductCollectionViewCell", bundle: .main)
         productCV.register(productCollectionViewCellXib, forCellWithReuseIdentifier: "ProductCollectionViewCell")
     }
@@ -131,8 +136,10 @@ class DisplayProductViewController: UIViewController {
         } else{
             print("Switch is Off")
             self.title = "Data from the File Directory"
-            //readData()
-            // do something ..
+            productArray.removeAll()
+            productCV.reloadData()
+            
+            productArray = readData()
         }
     }
     
@@ -143,6 +150,7 @@ class DisplayProductViewController: UIViewController {
         productCV.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5).isActive = true
         
     }
+    
     //MARK: Read From Data Base
     private func readData() -> [ProductModel] {
         var readStatement: OpaquePointer?
@@ -156,7 +164,7 @@ class DisplayProductViewController: UIViewController {
                               &readStatement,
                               nil) == SQLITE_OK {
             print("Read Query Compiled Successfully")
-            if sqlite3_step(readStatement) == SQLITE_ROW {
+            while sqlite3_step(readStatement) == SQLITE_ROW {
                 //(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image BLOB,Rate DOUBLE, Count INTEGER)
                 print("Read Query executed successfully")
                 let idInt32 = sqlite3_column_int(readStatement, 0)
@@ -249,6 +257,7 @@ extension DisplayProductViewController: UICollectionViewDataSource {
         cell.productName.text = productIndex.title
         cell.productPrice.text = "\(productIndex.price)"
         cell.layer.cornerRadius = 10
+        
         
         return cell
     }
