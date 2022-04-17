@@ -269,22 +269,3 @@ extension DisplayProductViewController : UICollectionViewDelegateFlowLayout {
         }
     }
 }
-
-// MARK: Image download
-extension DisplayProductViewController {
-    func downloadImage(url: URL) {
-        let session = URLSession(configuration: .default)
-        let dataTask = session.dataTask(with: url) { data, response, error in
-            guard let data = data else {
-                print("Image data not received from URL")
-                return
-            }
-            let image = UIImage(data: data)
-            DispatchQueue.main.async {
-                // Assign Image here
-                
-            }
-        }
-        dataTask.resume()
-    }
-}
