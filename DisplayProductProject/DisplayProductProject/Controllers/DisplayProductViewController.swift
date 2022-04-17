@@ -18,7 +18,7 @@ class DisplayProductViewController: UIViewController {
     //MARK: Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
- 
+        
         createSwitchBarButton()
         self.title = "Data from the File Directory"
         collectionViewRegistration()
@@ -49,14 +49,6 @@ class DisplayProductViewController: UIViewController {
                     print("Data is Nil")
                     return
                 }
-        
-//        let dataTask = session.dataTask(with: request) { data, response, error in
-//            if error == nil { // No Error
-//                guard let data = data else {
-//                    print("Data is Nil")
-//                    return
-//                }
-            
                 
                 do {
                     guard let productsArray = try JSONSerialization.jsonObject(with: data) as? [[String:Any]] else {
@@ -158,26 +150,26 @@ class DisplayProductViewController: UIViewController {
         
         var products = [ProductModel]()
         
-       if sqlite3_prepare_v2(self.dbDetailsObject,
-                           readQuery,
-                           -1,
-                           &readStatement,
-                           nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(self.dbDetailsObject,
+                              readQuery,
+                              -1,
+                              &readStatement,
+                              nil) == SQLITE_OK {
             print("Read Query Compiled Successfully")
             if sqlite3_step(readStatement) == SQLITE_ROW {
                 //(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image BLOB,Rate DOUBLE, Count INTEGER)
-               print("Read Query executed successfully")
+                print("Read Query executed successfully")
                 let idInt32 = sqlite3_column_int(readStatement, 0)
                 let id = Int(idInt32)
                 let price = sqlite3_column_double(readStatement, 2)
                 let rate = sqlite3_column_double(readStatement, 6)
                 let countInt32 = sqlite3_column_int(readStatement, 7)
                 let count = Int(countInt32)
-           guard
-                let titleCStr = sqlite3_column_text(readStatement, 1),
-                let descriptionCStr = sqlite3_column_text(readStatement, 3),
-                let categoryCStr = sqlite3_column_text(readStatement, 4)
-              //  let image = sqlite3_column_blob(readStatement, 5)
+                guard
+                    let titleCStr = sqlite3_column_text(readStatement, 1),
+                    let descriptionCStr = sqlite3_column_text(readStatement, 3),
+                    let categoryCStr = sqlite3_column_text(readStatement, 4)
+                        //  let image = sqlite3_column_blob(readStatement, 5)
                 else {
                     return [ProductModel]()
                 }
@@ -193,31 +185,31 @@ class DisplayProductViewController: UIViewController {
             } else {
                 print("Read Query NOT executed")
             }
-           return products
-       } else {
-           print("Read Query Compilation Failed")
-           return [ProductModel]()
-       }
+            return products
+        } else {
+            print("Read Query Compilation Failed")
+            return [ProductModel]()
+        }
     }
     
     //MARK: Step 2 - Create DataBase
-   private func openCreateDatabase() {
+    private func openCreateDatabase() {
         guard let dbPath = getPathForDocumentsDirectory() else{
             print("Documents Directory Path is Missing")
             return
         }
         print("DB Path: \(dbPath)")
-       
-       //Step2.1 - Importing SQLite3 and To check Database is Created or already present (bitcode.sqlite)
-       var dbdetails: OpaquePointer?
-       if sqlite3_open(dbPath,
-                       &dbdetails) == SQLITE_OK { /* Sqlite Ok used to check the query condition*/
-           print("Database is successfully created Or Already Present & we are able to access it/Open it")
-           self.dbDetailsObject = dbdetails
-       } else {
-           print("Unable to Create Or Open DB")
-
-       }
+        
+        //Step2.1 - Importing SQLite3 and To check Database is Created or already present (bitcode.sqlite)
+        var dbdetails: OpaquePointer?
+        if sqlite3_open(dbPath,
+                        &dbdetails) == SQLITE_OK { /* Sqlite Ok used to check the query condition*/
+            print("Database is successfully created Or Already Present & we are able to access it/Open it")
+            self.dbDetailsObject = dbdetails
+        } else {
+            print("Unable to Create Or Open DB")
+            
+        }
     }
     
     
@@ -237,7 +229,7 @@ class DisplayProductViewController: UIViewController {
             print(error.localizedDescription)
             return nil
         }
-
+        
     }
     
 }
