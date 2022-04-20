@@ -27,7 +27,23 @@ class ProductDetailViewController: UIViewController {
         creatCartButton()
         
         if let url = product?.imageUrl {
-            downloadImage(url: url)
+            downloadImage(url: url) { status, image in
+                // Got url response
+                if status {
+                    // Success
+                    // save image to DD
+                    guard let image = image,
+                          let product = self.product else {
+                        return
+                    }
+                    self.saveImageToDocumentDirectory(name: "Image\(product.id)",
+                                                 image: image)
+                    
+                } else {
+                    // Failure
+                    print("Could not fetch image from API")
+                }
+            }
         } else {
             print("Invalid/Empty URL")
         }
@@ -134,7 +150,7 @@ class ProductDetailViewController: UIViewController {
     private func createProductTableDB() {
         var opaquePointerObject_CreateTable: OpaquePointer?
         
-        let createTableQuery = "CREATE TABLE \(tableNameProducts)(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image BLOB,Rate DOUBLE, Count INTEGER)"
+        let createTableQuery = "CREATE TABLE \(tableNameProducts)(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image TEXT,Rate DOUBLE, Count INTEGER)"
         
         //Step-3.1 -> Preparing a Query -> we need query because sqlite understands a query language to communicate.
         // * Query has fixed Syntax
@@ -161,7 +177,7 @@ class ProductDetailViewController: UIViewController {
         var OpaquePointerInsertData: OpaquePointer?
         
         //(ID INTEGER PRIMARY KEY, Title TEXT,Price DOUBLE,Description TEXT,Category TEXT,Image BLOB,Rate DOUBLE, Count INTEGER)
-        let insertQuery = "INSERT INTO \(tableNameProducts)(ID,Title,Price,Description,Category,Rate,Count) VALUES(?,?,?,?,?,?,?)"
+        let insertQuery = "INSERT INTO \(tableNameProducts)(ID,Title,Price,Description,Category,Rate,Count,Image) VALUES(?,?,?,?,?,?,?,?)"
         // Prepare
         if sqlite3_prepare_v2(self.dbDetailsObject,
                               insertQuery,
@@ -174,7 +190,7 @@ class ProductDetailViewController: UIViewController {
             let price = Double(product.price)
             let description = (product.descrition as NSString).utf8String
             let category = (product.category as NSString).utf8String
-            //           let image = (product.imageUrl! as URL)
+            let imageName = ((product.imageName ?? "") as NSString).utf8String
             let rate = Double(product.rate)
             let count = Int32(product.count)
             
@@ -184,9 +200,9 @@ class ProductDetailViewController: UIViewController {
             sqlite3_bind_double(OpaquePointerInsertData, 3, price) // Price
             sqlite3_bind_text(OpaquePointerInsertData,4,description, -1,nil) // Description
             sqlite3_bind_text(OpaquePointerInsertData, 5, category,-1,nil) // Category
-            //         sqlite3_bind_blob(OpaquePointerInsertData, 6, image,-1,nil) // Image
             sqlite3_bind_double(OpaquePointerInsertData, 6, rate) // Rate
             sqlite3_bind_int(OpaquePointerInsertData, 7, count) // Count
+            sqlite3_bind_text(OpaquePointerInsertData, 8, imageName, -1, nil)
             // step
             if sqlite3_step(OpaquePointerInsertData) == SQLITE_DONE { /* Sqlite Done used to execute an action  i.e To Inserting Data */
                 print("Data Inserted Successfully")
@@ -251,18 +267,62 @@ class ProductDetailViewController: UIViewController {
 
 // MARK: Image download
 extension ProductDetailViewController {
-    func downloadImage(url: URL) {
+    func downloadImage(url: URL, completionHandler: @escaping ((_ status: Bool, _ image: UIImage?) -> Void)) {
         let session = URLSession(configuration: .default)
         let dataTask = session.dataTask(with: url) { data, response, error in
-            guard let data = data else {
-                print("Image data not received from URL")
-                return
-            }
-            DispatchQueue.main.async {
-                // Assign Image here
-                self.imageView.image = UIImage(data: data)
+            
+            if let error = error {
+                // Error
+                print(error.localizedDescription)
+                completionHandler(false, nil)
+            } else {
+                // No error
+                guard let data = data else {
+                    print("Image data not received from URL")
+                    return
+                }
+                let image = UIImage(data: data)
+                completionHandler(true, image)
             }
         }
         dataTask.resume()
+    }
+}
+
+// MARK: Save data to DD
+extension ProductDetailViewController {
+    private func saveImageToDocumentDirectory(name: String, image: UIImage) {
+        guard let documentDirPathWithImageName = getDDPathFor(imageName: name) else {
+            print("DD path not found")
+            return
+        }
+        
+        // Save to DD
+        if let imageData = image.jpegData(compressionQuality: 1) {
+            do {
+                try imageData.write(to: documentDirPathWithImageName)
+                self.product?.image = image
+                self.product?.imageName = name
+                print("Image data saved to DD")
+            } catch {
+                print("Could not save image")
+            }
+        } else {
+            print("Unable to get the data")
+        }
+    }
+    
+    private func getDDPathFor(imageName: String) -> URL? {
+        do {
+            let documentDir = try FileManager.default.url(for: .documentDirectory,
+                                                      in: .userDomainMask,
+                                                      appropriateFor: nil,
+                                                          create: false).appendingPathComponent(imageName)
+            return documentDir
+            
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
     }
 }

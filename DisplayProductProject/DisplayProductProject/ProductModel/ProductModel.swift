@@ -12,7 +12,8 @@ struct ProductModel {
     let rate: Double
     let count: Int
     let imageUrl: URL?
-    let image: UIImage?
+    var image: UIImage?
+    var imageName: String?
 }
 
 /*"id": 1,
