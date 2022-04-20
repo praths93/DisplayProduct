@@ -78,24 +78,10 @@ class ProductDetailViewController: UIViewController {
         }
         isDataBaseOpened = true
         
-        //(ID INTEGER PRIMARY KEY, Title TEXT,Price FLOAT,Description TEXT,Category TEXT,Image BLOB,Rate FLOAT, Count INTEGER)
-        let pdtId = product?.id ?? 0
-        let pdtTitle = product?.title ?? ""
-        let pdtPrice = product?.price ?? 0
-        let pdtDescription = product?.descrition ?? ""
-        let pdtCategory = product?.category ?? ""
-        let pdtRate = product?.rate ?? 0
-        let pdtCount = product?.count ?? 0
-        let productObj = ProductModel(id: pdtId,
-                                      title: pdtTitle,
-                                      price: pdtPrice,
-                                      descrition: pdtDescription,
-                                      category: pdtCategory,
-                                      rating: [:],
-                                      rate: pdtRate,
-                                      count: pdtCount,
-                                      imageUrl: nil,
-                                      image: nil)
+        guard let productObj = self.product else {
+            print("Product object missing")
+            return
+        }
         
         insertDataInTable(product: productObj)
         
@@ -303,6 +289,9 @@ extension ProductDetailViewController {
                 try imageData.write(to: documentDirPathWithImageName)
                 self.product?.image = image
                 self.product?.imageName = name
+                DispatchQueue.main.async {
+                    self.imageView.image = image
+                }
                 print("Image data saved to DD")
             } catch {
                 print("Could not save image")
