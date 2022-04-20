@@ -10,7 +10,6 @@ class DisplayProductViewController: UIViewController {
     private var isBookmarkSwitchOn = false
     //MARK: Global Variables
     var productArray: [ProductModel] = []
-    var product: ProductModel?
     var dbDetailsObject: OpaquePointer?
     let tableNameProducts = "Products"
     let databaseName = "bitcode.sqlite" //Step 3 - create Database Name
