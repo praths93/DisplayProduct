@@ -15,18 +15,35 @@ class ProductDetailViewController: UIViewController {
     
     
     var product: ProductModel?
-    var productsAry = [ProductModel]()
+    var indexOfProduct: Int?
     var dbDetailsObject: OpaquePointer?
     let tableNameProducts = "Products"
     let databaseName = "bitcode.sqlite" //Step 3 - create Database Name
     var isDataBaseOpened = false
     
+    var passDataClosure: ((ProductModel?, _ index: Int?) -> Void)?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         creatCartButton()
+        productNameLabel.text = product?.title
+        idNoLabel.text = "Id No: \(product?.id ?? 0)"
+        priceLabel.text = "Price: \(product?.price ?? 0)"
+        productDescriptionLabel.text = product?.descrition
+        productCategoryLabel.text = product?.category
+        productRatingRateLabel.text = "Rate: \(product?.rate ?? 0)"
+        productRatingCountLabel.text = "Count: \(product?.count ?? 0)"
         
-        if let url = product?.imageUrl {
+        if let image = product?.image {
+            self.imageView.image = image
+        } else {
+            fetchImageFromNet(product?.imageUrl)
+        }
+    }
+    
+    private func fetchImageFromNet(_ url: URL?) {
+        if let url = url {
             downloadImage(url: url) { status, image in
                 // Got url response
                 if status {
@@ -47,16 +64,6 @@ class ProductDetailViewController: UIViewController {
         } else {
             print("Invalid/Empty URL")
         }
-        
-        productNameLabel.text = product?.title
-        idNoLabel.text = "Id No: \(product?.id ?? 0)"
-        priceLabel.text = "Price: \(product?.price ?? 0)"
-        productDescriptionLabel.text = product?.descrition
-        productCategoryLabel.text = product?.category
-        productRatingRateLabel.text = "Rate: \(product?.rate ?? 0)"
-        productRatingCountLabel.text = "Count: \(product?.count ?? 0)"
-        
-        
     }
     
     
@@ -71,7 +78,6 @@ class ProductDetailViewController: UIViewController {
     }
     
     @objc func moveToCartButtonAction() {
-        
         if !isDataBaseOpened {
             openCreateDatabase() // To call this Function
             createProductTableDB() // To call this Function
@@ -85,13 +91,13 @@ class ProductDetailViewController: UIViewController {
         
         insertDataInTable(product: productObj)
         
-        
-        //readData()
-        
-        for product in self.productsAry {
-            insertDataInTable(product: product)
-            
+        // Back Data Passing
+        guard let closure = self.passDataClosure else {
+            print("Closure is missing")
+            return
         }
+        closure(self.product,
+                indexOfProduct)
         self.navigationController?.popViewController(animated: true)
     }
     //MARK: Step 2 - Create DataBase
