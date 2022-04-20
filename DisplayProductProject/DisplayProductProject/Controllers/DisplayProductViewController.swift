@@ -276,9 +276,28 @@ extension DisplayProductViewController : UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let vc = self.storyboard?.instantiateViewController(withIdentifier: "ProductDetailViewController") as? ProductDetailViewController {
             vc.product = productArray[indexPath.row]
+            vc.indexOfProduct = indexPath.row
+            vc.passDataClosure = { (updatedProduct, index) in
+                self.updateNewProductInArray(updatedProduct, index: index)
+            }
             self.navigationController?.pushViewController(vc, animated: true)
         } else {
             print("VC not found")
         }
+    }
+    
+    private func updateNewProductInArray(_ product: ProductModel?, index: Int?) {
+        guard let product = product,
+        let index = index else {
+            print("Product is Empty")
+            return
+        }
+        
+        productArray.remove(at: index)
+        productArray.insert(product, at: index)
+        let indexPathOfCurrentData = IndexPath(item: index, section: 0)
+        productCV.reloadItems(at: [indexPathOfCurrentData])
+        
+
     }
 }
